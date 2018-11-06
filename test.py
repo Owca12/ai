@@ -1,5 +1,8 @@
+import random
+
 from BaseMovableObject import *
 from vectorCalculator import *
+
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -8,6 +11,29 @@ DARK_BLUE = (0, 0, 128)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 PINK = (255, 200, 200)
+
+
+class MapElement(pg.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+        radius = random.randint(5, 50)
+
+        self.image = pg.Surface((2*radius, 2*radius), pg.SRCALPHA)
+        pg.draw.circle(
+            self.image,
+            pg.Color('white'),
+            (radius, radius), radius, 0)
+        self.orig_img = self.image
+        self.rect = self.image.get_rect(center=pos)
+        self.pos = pg.math.Vector2(pos)
+
+
+def PlaceObjects( obj_number , all_objects ):
+    for i in range(obj_number):
+        x_obj = random.randint(1, 640)
+        y_obj = random.randint(1, 480)
+        map_obj_i = MapElement((x_obj, y_obj))
+        all_objects.add(map_obj_i)
 
 
 class Player(BaseMovableObject):
@@ -48,6 +74,9 @@ def main():
     player = Player((320, 240), 2)
     all_sprites.add(player)
 
+    all_objects = pg.sprite.Group()
+    PlaceObjects(20, all_objects)
+
     done = False
     while not done:
         player.rotate_player()
@@ -71,7 +100,7 @@ def main():
         all_sprites.update()
         screen.fill((30, 30, 30))
         all_sprites.draw(screen)
-
+        all_objects.draw(screen)
         pg.display.flip()
         clock.tick(30)
 
