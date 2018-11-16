@@ -26,8 +26,6 @@ class BaseMovableObject(pg.sprite.Sprite):
     def rotate(self, face_target):
         _, self.angle = (face_target-self.pos).as_polar()
 
-    #def vector(self, vector):
-
     def do_move(self, target_position):
         target_vector = sub(target_position, self.pos)
         move_vector = [c * self.speed for c in normalize(target_vector)]
@@ -38,53 +36,43 @@ class BaseMovableObject(pg.sprite.Sprite):
 
     def search_range(self, range, distacne):
         # Perception range and distance
-        self.perception_range = range
-        self.perception_distance = distacne
+        perception_range = range
+        perception_distance = distacne
+        # Perception points - testing these for potential collisions
+        perception_point_one_x = perception_distance * math.cos(
+            math.radians(self.angle + perception_range))
+        perception_point_one_y = perception_distance * math.sin(
+            math.radians(self.angle + perception_range))
+        self.perception_point_one = pg.math.Vector2(self.pos[0] + perception_point_one_x,
+                                                    self.pos[1] + perception_point_one_y)
 
-        # Perception points - testing these for potential collision
-        self.perception_point_one_x = self.perception_distance * math.cos(
-            math.radians(self.angle + self.perception_range))
-        self.perception_point_one_y = self.perception_distance * math.sin(
-            math.radians(self.angle + self.perception_range))
-
-        self.perception_point_one = pg.math.Vector2(self.pos[0] + self.perception_point_one_x,
-                                                    self.pos[1] + self.perception_point_one_y)
-
-        self.perception_point_two_x = self.perception_distance * math.cos(
-            math.radians(self.angle - self.perception_range))
-        self.perception_point_two_y = self.perception_distance * math.sin(
-            math.radians(self.angle - self.perception_range))
-
-        self.perception_point_two = pg.math.Vector2(self.pos[0] + self.perception_point_two_x,
-                                                    self.pos[1] + self.perception_point_two_y)
+        perception_point_two_x = perception_distance * math.cos(
+            math.radians(self.angle - perception_range))
+        perception_point_two_y = perception_distance * math.sin(
+            math.radians(self.angle - perception_range))
+        self.perception_point_two = pg.math.Vector2(self.pos[0] + perception_point_two_x,
+                                                    self.pos[1] + perception_point_two_y)
 
     def do_move_avoid_obstacle(self, target_position, obstacle_position, is_collision, direction):
-
         target_vector = sub(target_position, self.pos)
-
         if is_collision == True:
-            #Force vector pushing the object away from the obstacle
-            obstacle_vector = sub(obstacle_position, self.pos)
-
-            force_vector_one = sub( self.perception_point_one, obstacle_position )#add( obstacle_vector, self.perception_point_one )
-            force_vector_two = sub( self.perception_point_two, obstacle_position ) #sub( obstacle_vector, self.perception_point_two)
+            #Force vector pushing the object away from the obstacle according to position
+            obstacle_vector_one = normalize(sub(self.perception_point_one, obstacle_position))
+            obstacle_vector_two = normalize(sub(self.perception_point_two, obstacle_position))
+            # Force vector pushing the object perpendicullary away from the obstacle
+            force_vector_two = normalize(perpendicular_vector((sub(target_position, self.pos))))
+            force_vector_one = normalize(rev_perpendicular_vector((sub(target_position, self.pos))))
 
             if direction == 0:
-                move_vector = [c * self.speed for c in normalize( force_vector_one )]
+                move_vector = [c * self.speed for c in (add(force_vector_one,obstacle_vector_one))]
 
             elif direction == 1:
-                move_vector = [c * self.speed for c in normalize( force_vector_two )]
-
-
-            self.vel = move_vector
-
+                move_vector = [c * self.speed for c in (add(force_vector_two,obstacle_vector_two))]
 
         elif is_collision == False:
-
-
             move_vector = [c * self.speed for c in normalize(target_vector)]
-            self.vel = move_vector
-            print("NOT AVOIDING")
+
+        self.vel = move_vector
 
 
 
