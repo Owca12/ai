@@ -42,3 +42,6 @@ def rev_perpendicular_vector(v):
     rev_vect = pg.math.Vector2()
     rev_vect.x, rev_vect.y = vy, -vx
     return rev_vect
+
+def Distance(u , v):
+    return magnitude(sub(u, v))

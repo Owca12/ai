@@ -56,9 +56,10 @@ class BaseMovableObject(pg.sprite.Sprite):
     def do_move_avoid_obstacle(self, target_position, obstacle_position, is_collision, direction):
         target_vector = sub(target_position, self.pos)
         if is_collision == True:
-            #Force vector pushing the object away from the obstacle according to position
+            # Force vector pushing the object away from the obstacle according to position
             obstacle_vector_one = normalize(sub(self.perception_point_one, obstacle_position))
             obstacle_vector_two = normalize(sub(self.perception_point_two, obstacle_position))
+
             # Force vector pushing the object perpendicullary away from the obstacle
             force_vector_two = normalize(perpendicular_vector((sub(target_position, self.pos))))
             force_vector_one = normalize(rev_perpendicular_vector((sub(target_position, self.pos))))
@@ -73,39 +74,5 @@ class BaseMovableObject(pg.sprite.Sprite):
             move_vector = [c * self.speed for c in normalize(target_vector)]
 
         self.vel = move_vector
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        #print("avoiding")
-        # elif math.hypot(obstacle_position[0] - self.perception_point_two[0],
-        #               obstacle_position[1] - self.perception_point_two[1]) < obstacle_radius:
-        #     move_vector = [c * self.speed for c in normalize(add(target_vector, self.force_vector_two))]
-        #     self.angle = 1.01 * self.angle
-        #     print("avoiding")
-        #
-        # self.vel = move_vector
-        # target_vector = sub(target_position, self.pos)
-        # obstacle_vector = sub(obstacle_position, self.pos)
-        # move_vector = [c * self.speed for c in normalize(add( target_vector, obstacle_vector))]
-        # if direction == 1:
-        #     self.angle = 0.5 * self.angle
-        #     self.vel = move_vector
-        # else:
-        #     self.angle = 1.1 * self.angle
-        #     self.vel = move_vector
 
 
