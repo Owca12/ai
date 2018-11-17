@@ -1,7 +1,6 @@
 import random
-
-from BaseMovableObject import *
-from vectorCalculator import *
+from Entity.Agent import *
+from Entity.Player import *
 
 
 RED = (255, 0, 0)
@@ -36,43 +35,13 @@ def PlaceObjects( obj_number , all_objects ):
         all_objects.add(map_obj_i)
 
 
-class Player(BaseMovableObject):
-    def __init__(self, vec_pos, speed):
-        self.image = pg.Surface((50, 40), pg.SRCALPHA)
-        pg.draw.polygon(
-            self.image,
-            pg.Color('white'),
-            ((1, 1), (49, 20), (1, 39)))
-        BaseMovableObject.__init__(self, self.image, vec_pos, speed)
-
-    def rotate_player(self):
-        self.rotate(pg.mouse.get_pos())
-
-    def player_do_move(self):
-        self.do_move(pg.mouse.get_pos())
-
-    def do_dodge(self, direction):
-        face_vector = sub(pg.mouse.get_pos(), self.pos)
-        norm_face_vector = normalize(face_vector)
-        target_vector = pg.math.Vector2()
-        target_vector.x = norm_face_vector[0]
-        target_vector.y = norm_face_vector[1]
-        if direction is 0:
-            move_vector = [c * self.speed for c in normalize(perpendicular_vector(target_vector))]
-        else:
-            move_vector = [c * self.speed for c in normalize(-perpendicular_vector(target_vector))]
-        self.vel = move_vector
-
-    def stop(self):
-        self.vel = pg.math.Vector2(0, 0)
-
-
 def main():
     screen = pg.display.set_mode((640, 480))
     clock = pg.time.Clock()
     all_sprites = pg.sprite.Group()
     player = Player((320, 240), 2)
-    all_sprites.add(player)
+    enemy = Agent((300, 200), 1)
+    all_sprites.add(player, enemy)
 
     all_objects = pg.sprite.Group()
     PlaceObjects(20, all_objects)
@@ -80,6 +49,9 @@ def main():
     done = False
     while not done:
         player.rotate_player()
+        # enemy.apply_pursuit(player)
+        # enemy.apply_seek(player.pos)
+        enemy.apply_wander()
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT]:
             player.do_dodge(1)
