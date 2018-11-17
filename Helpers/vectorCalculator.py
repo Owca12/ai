@@ -7,11 +7,11 @@ def magnitude(v):
 
 
 def add(u, v):
-    return [ u[i]+v[i] for i in range(len(u)) ]
+    return [u[i]+v[i] for i in range(len(u))]
 
 
 def sub(u, v):
-    return [ u[i]-v[i] for i in range(len(u)) ]
+    return [u[i]-v[i] for i in range(len(u))]
 
 
 def dot(u, v):
@@ -20,7 +20,7 @@ def dot(u, v):
 
 def normalize(v):
     vmag = magnitude(v)
-    return [ v[i]/vmag  for i in range(len(v)) ]
+    return [v[i]/vmag for i in range(len(v))]
 
 
 def perpendicular_vector(v):
@@ -30,3 +30,8 @@ def perpendicular_vector(v):
     perp_vect = pg.math.Vector2()
     perp_vect.x, perp_vect.y = -v.y, v.x
     return perp_vect
+
+
+def distance(u, v):
+    return magnitude(sub(u, v))
+
