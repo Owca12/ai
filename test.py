@@ -1,5 +1,4 @@
 import random
-
 from BaseMovableObject import *
 from vectorCalculator import *
 
@@ -16,8 +15,7 @@ PINK = (255, 200, 200)
 class MapElement(pg.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
-        radius = random.randint(5, 50)
-
+        radius = random.randint(50, 50)
         self.image = pg.Surface((2*radius, 2*radius), pg.SRCALPHA)
         pg.draw.circle(
             self.image,
@@ -26,14 +24,6 @@ class MapElement(pg.sprite.Sprite):
         self.orig_img = self.image
         self.rect = self.image.get_rect(center=pos)
         self.pos = pg.math.Vector2(pos)
-
-
-def PlaceObjects( obj_number , all_objects ):
-    for i in range(obj_number):
-        x_obj = random.randint(1, 640)
-        y_obj = random.randint(1, 480)
-        map_obj_i = MapElement((x_obj, y_obj))
-        all_objects.add(map_obj_i)
 
 
 class Player(BaseMovableObject):
@@ -67,18 +57,45 @@ class Player(BaseMovableObject):
         self.vel = pg.math.Vector2(0, 0)
 
 
+class Enemy(BaseMovableObject):
+    def __init__(self, vec_pos, speed):
+        self.image = pg.Surface((50, 40), pg.SRCALPHA)
+        pg.draw.polygon(
+            self.image,
+            pg.Color('red'),
+            ((1, 1), (49, 20), (1, 39)))
+        BaseMovableObject.__init__(self, self.image, vec_pos, speed)
+
+    def rotate_enemy(self, player_pos):
+        self.rotate(player_pos)
+
+    def enemy_do_move(self, target_position, obstacle_position, is_collision, direction):
+        self.do_move_avoid_obstacle(target_position, obstacle_position, is_collision, direction)
+
+    def stop(self):
+        self.vel = pg.math.Vector2(0, 0)
+
+
 def main():
-    screen = pg.display.set_mode((640, 480))
+    screen = pg.display.set_mode((1024, 780))
     clock = pg.time.Clock()
     all_sprites = pg.sprite.Group()
-    player = Player((320, 240), 2)
-    all_sprites.add(player)
-
-    all_objects = pg.sprite.Group()
-    PlaceObjects(20, all_objects)
+    player = Player((640, 0), 3)
+    enemy = Enemy((0, 480), 5)
+    all_sprites.add(player, enemy)
+    all_obstacles = pg.sprite.Group()
+    obstacle_position_array = []
+    direction = 0
+    for i in range(10):
+        x_obj = 200 * random.randint(1, 4)
+        y_obj = 200 * random.randint(1, 3)
+        map_obj = MapElement((x_obj, y_obj))
+        obstacle_position_array.append(map_obj.pos)
+        all_obstacles.add(map_obj)
 
     done = False
     while not done:
+        is_collision = False
         player.rotate_player()
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT]:
@@ -97,10 +114,25 @@ def main():
                 elif event.key == pg.K_RIGHT or event.key == pg.K_LEFT:
                     player.stop()
 
+        enemy.search_range(15, 40)
+        for i in range(len(obstacle_position_array)):
+            if Distance(obstacle_position_array[i], enemy.perception_point_one) < 50:
+                is_collision = True
+                direction = 0
+                break
+
+            elif Distance(obstacle_position_array[i], enemy.perception_point_two) < 50:
+                is_collision = True
+                direction = 1
+                break
+
+        enemy.enemy_do_move(player.pos, (obstacle_position_array[i][0], obstacle_position_array[i][1]), is_collision, direction)
+        enemy.rotate_enemy(player.pos)
+
         all_sprites.update()
         screen.fill((30, 30, 30))
         all_sprites.draw(screen)
-        all_objects.draw(screen)
+        all_obstacles.draw(screen)
         pg.display.flip()
         clock.tick(30)
 

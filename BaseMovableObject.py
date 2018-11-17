@@ -1,4 +1,5 @@
 from vectorCalculator import *
+import math
 
 
 class BaseMovableObject(pg.sprite.Sprite):
@@ -12,6 +13,9 @@ class BaseMovableObject(pg.sprite.Sprite):
         self.vel = pg.math.Vector2(0, 0)
         self.speed = speed
         self.angle = 0
+        self.vector = 0
+        self.perception_point_one = pg.math.Vector2(0, 0)
+        self.perception_point_two = pg.math.Vector2(0, 0)
 
     def update(self):
         self.image = pg.transform.rotozoom(self.orig_img, -self.angle, 1)
@@ -29,5 +33,46 @@ class BaseMovableObject(pg.sprite.Sprite):
 
     def stop(self):
         self.vel = pg.math.Vector2(0, 0)
+
+    def search_range(self, range, distacne):
+        # Perception range and distance
+        perception_range = range
+        perception_distance = distacne
+        # Perception points - testing these for potential collisions
+        perception_point_one_x = perception_distance * math.cos(
+            math.radians(self.angle + perception_range))
+        perception_point_one_y = perception_distance * math.sin(
+            math.radians(self.angle + perception_range))
+        self.perception_point_one = pg.math.Vector2(self.pos[0] + perception_point_one_x,
+                                                    self.pos[1] + perception_point_one_y)
+
+        perception_point_two_x = perception_distance * math.cos(
+            math.radians(self.angle - perception_range))
+        perception_point_two_y = perception_distance * math.sin(
+            math.radians(self.angle - perception_range))
+        self.perception_point_two = pg.math.Vector2(self.pos[0] + perception_point_two_x,
+                                                    self.pos[1] + perception_point_two_y)
+
+    def do_move_avoid_obstacle(self, target_position, obstacle_position, is_collision, direction):
+        target_vector = sub(target_position, self.pos)
+        if is_collision == True:
+            # Force vector pushing the object away from the obstacle according to position
+            obstacle_vector_one = normalize(sub(self.perception_point_one, obstacle_position))
+            obstacle_vector_two = normalize(sub(self.perception_point_two, obstacle_position))
+
+            # Force vector pushing the object perpendicullary away from the obstacle
+            force_vector_two = normalize(perpendicular_vector((sub(target_position, self.pos))))
+            force_vector_one = normalize(rev_perpendicular_vector((sub(target_position, self.pos))))
+
+            if direction == 0:
+                move_vector = [c * self.speed for c in (add(force_vector_one,obstacle_vector_one))]
+
+            elif direction == 1:
+                move_vector = [c * self.speed for c in (add(force_vector_two,obstacle_vector_two))]
+
+        elif is_collision == False:
+            move_vector = [c * self.speed for c in normalize(target_vector)]
+
+        self.vel = move_vector
 
 
