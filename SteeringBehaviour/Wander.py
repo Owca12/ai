@@ -1,24 +1,22 @@
 import random
-
+from SteeringBehaviour.SingleBehaviour import *
 from Entity.Player import *
-from SteeringBehaviour.Seek import seek
 
 
 class Wander:
 
-    def __init__(self):
-        self.wander_radius = 1
-        self.wander_distance = 1.5
-        self.wander_jitter = 0.5
+    def __init__(self, agent):
+        self.agent = agent
+        self.wander_radius = 0.3
+        self.wander_distance = 0.7
+        self.wander_jitter = 0.3
         self.wander_target = pg.math.Vector2()
 
-    def wander(self, wanderer):
+    def wander(self):
         self.wander_target += pg.math.Vector2(random.uniform(-1, 1) * self.wander_jitter,
                                               random.uniform(-1, 1) * self.wander_jitter)
         self.wander_target.normalize()
         self.wander_target *= self.wander_radius
-        print(self.wander_target)
-        new_target = add(self.wander_target, [coord * self.wander_distance for coord in normalize(wanderer.vel)])
-        print(new_target)
-        return [c * wanderer.speed for c in normalize(new_target)]
+        new_target = add(self.wander_target, [coord * self.wander_distance for coord in normalize(self.agent.vel)])
+        return new_target
 
