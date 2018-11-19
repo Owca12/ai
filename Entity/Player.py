@@ -8,7 +8,7 @@ class Player(BaseMovableObject):
             self.image,
             pg.Color('white'),
             ((1, 1), (49, 20), (1, 39)))
-        BaseMovableObject.__init__(self, self.image, vec_pos, speed)
+        super().__init__(self.image, vec_pos, speed)
 
     def rotate_player(self):
         self.rotate(pg.mouse.get_pos())

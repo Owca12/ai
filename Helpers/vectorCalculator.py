@@ -20,7 +20,10 @@ def dot(u, v):
 
 def normalize(v):
     vmag = magnitude(v)
-    return [v[i]/vmag for i in range(len(v))]
+    if vmag == 0:
+        return [0, 0]
+    else:
+        return [v[i]/vmag for i in range(len(v))]
 
 
 def perpendicular_vector(v):
