@@ -9,9 +9,11 @@ from SteeringBehaviour.Wander import Wander
 class SteeringBehaviourManager:
     def __init__(self):
         self.behaviours = []
-        self.multiWander = 1
-        self.multiCohesion = 0.1
-        self.multiPersuit = 0.1
+        self.multiWander = 0.1
+        self.multiCohesion = 0.2
+        self.multiPersuit = 0.0
+        self.multiAvoid = 0.7
+        self.multiHide = 0.15
 
     def truncate(self, vector, max_magnitude):
         current = magnitude(vector)
@@ -36,6 +38,14 @@ class SteeringBehaviourManager:
 
     def calculate_dithered(self, agent):
         steering_force = pg.math.Vector2(0, 0)
+        if "Avoid" in self.behaviours:
+            new_force = [c * self.multiAvoid for c in SingleBehaviour(agent).avoid_obstacle()]
+            if not self.accumulate_force(agent, steering_force, new_force):
+                return steering_force
+        if "Hide" in self.behaviours:
+            new_force = [c * self.multiHide for c in SingleBehaviour(agent).hide(agent.target.pos)]
+            if not self.accumulate_force(agent, steering_force, new_force):
+                return steering_force
         if "Wander" in self.behaviours:
             new_force = [c * self.multiWander for c in Wander(agent).wander()]
             if not self.accumulate_force(agent, steering_force, new_force):
@@ -52,8 +62,10 @@ class SteeringBehaviourManager:
 
     def change_dithered_probabilistic(self, behaviour, probabilistic):
         if behaviour is "Wander":
-            self.prWander = probabilistic
+            self.multiWander = probabilistic
         if behaviour is "Persuit":
-            self.prPersuit = probabilistic
+            self.multiPersuit = probabilistic
         if behaviour is "Cohesion":
-            self.prCohesion = probabilistic
+            self.multiCohesion = probabilistic
+        if behaviour is "Hide":
+            self.multiHide = probabilistic

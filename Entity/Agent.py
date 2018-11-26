@@ -4,7 +4,7 @@ from SteeringBehaviour.SteeringBehaviourManager import *
 
 
 class Agent(BaseMovableObject):
-    def __init__(self, vec_pos, speed, player_target):
+    def __init__(self, vec_pos, speed, player_target, obstacles, search_radius):
         self.image = pg.Surface((2 * 30, 2 * 30), pg.SRCALPHA)
         pg.draw.circle(
             self.image,
@@ -14,6 +14,8 @@ class Agent(BaseMovableObject):
         self.neighbours = []
         self.target = player_target
         self.behaviour_manager = SteeringBehaviourManager()
+        self.obstacles = obstacles
+        self.search_radius = search_radius
 
     def add_neighbours(self, neighbours):
         for agent in neighbours:
@@ -39,6 +41,12 @@ class Agent(BaseMovableObject):
     def on_persuit(self):
         self.behaviour_manager.enable("Persuit")
 
+    def on_avoid(self):
+        self.behaviour_manager.enable("Avoid")
+
+    def on_hide(self):
+        self.behaviour_manager.enable("Hide")
+
     def on_wander(self):
         self.behaviour_manager.enable("Wander")
 
@@ -54,11 +62,11 @@ class Agent(BaseMovableObject):
             if max_distance < distance(self.pos, neighbour.pos):
                 max_distance = distance(self.pos, neighbour.pos)
 
-        print(max_distance)
-        if max_distance < 300:
-            self.behaviour_manager.change_dithered_probabilistic("Persuit", 0.1)
-            self.behaviour_manager.change_dithered_probabilistic("Wander", 1)
+        if max_distance < 150:
+            self.behaviour_manager.change_dithered_probabilistic("Persuit", 0.5)
+            self.behaviour_manager.change_dithered_probabilistic("Wander", 0.1)
             self.behaviour_manager.change_dithered_probabilistic("Cohesion", 0)
+            self.behaviour_manager.change_dithered_probabilistic("Hide", 0)
 
 
 

@@ -7,8 +7,8 @@ class Wander:
 
     def __init__(self, agent):
         self.agent = agent
-        self.wander_radius = 0.3
-        self.wander_distance = 0.7
+        self.wander_radius = 0.3*agent.speed
+        self.wander_distance = agent.speed
         self.wander_jitter = 0.3
         self.wander_target = pg.math.Vector2()
 
