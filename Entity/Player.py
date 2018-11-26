@@ -27,3 +27,14 @@ class Player(BaseMovableObject):
         else:
             move_vector = [c * self.speed for c in normalize(-perpendicular_vector(target_vector))]
         self.vel = move_vector
+
+    def shoot_laser(self, enemies):
+        end_point_position = [c * 150 for c in normalize(sub(pg.mouse.get_pos(), self.pos))]
+        end_point_position = add(end_point_position, self.pos)
+        for enemy in enemies:
+            if distance(enemy.pos, self.pos) < distance(end_point_position, self.pos):
+                enemy.pos = pg.math.Vector2(1000, 1000)
+                enemy.speed = [0, 0]
+                enemies.remove(enemy)
+
+        return end_point_position

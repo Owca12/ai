@@ -1,6 +1,7 @@
 import random
 from Entity.Agent import *
 from Entity.Player import *
+from Entity.NonMovableObject import *
 
 
 RED = (255, 0, 0)
@@ -12,39 +13,29 @@ BLACK = (0, 0, 0)
 PINK = (255, 200, 200)
 
 
-class MapElement(pg.sprite.Sprite):
-    def __init__(self, pos):
-        super().__init__()
-        radius = random.randint(5, 50)
-
-        self.image = pg.Surface((2*radius, 2*radius), pg.SRCALPHA)
-        pg.draw.circle(
-            self.image,
-            pg.Color('white'),
-            (radius, radius), radius, 0)
-        self.orig_img = self.image
-        self.rect = self.image.get_rect(center=pos)
-        self.pos = pg.math.Vector2(pos)
-
-
-def PlaceObjects( obj_number , all_objects ):
-    for i in range(obj_number):
-        x_obj = random.randint(1, 640)
-        y_obj = random.randint(1, 480)
-        map_obj_i = MapElement((x_obj, y_obj))
-        all_objects.add(map_obj_i)
-
-
 def main():
-    screen = pg.display.set_mode((640, 480))
+    screen = pg.display.set_mode((1800, 800))
+    laser_size = 0
+    end_point_position = [0, 0]
     clock = pg.time.Clock()
     all_sprites = pg.sprite.Group()
-    player = Player((120, 240), 1)
-    enemy1 = Agent((200, 400), .7, player)
-    enemy2 = Agent((380, 380), .7, player)
-    enemy3 = Agent((540, 260), .7, player)
-    enemy4 = Agent((460, 180), .7, player)
-    enemy5 = Agent((580, 60), .7, player)
+    all_obstacles = pg.sprite.Group()
+    all_obstacles_list = []
+    for i in range(20):
+        x_obj = 200 * random.randint(1, 8) + random.randint(0, 20)
+        y_obj = 200 * random.randint(1, 5) + random.randint(0, 20)
+        radius = random.randint(25, 75)
+        map_obj = NonMovableObject((x_obj, y_obj), radius)
+        all_obstacles_list.append(map_obj)
+        all_obstacles.add(map_obj)
+
+
+    player = Player((120, 240), 4)
+    enemy1 = Agent((50, 50), 8, player, all_obstacles_list, 150)
+    enemy2 = Agent((1000, 50), 8, player, all_obstacles_list, 150)
+    enemy3 = Agent((50, 500), 8, player, all_obstacles_list, 150)
+    enemy4 = Agent((1800, 500), 8, player, all_obstacles_list, 150)
+    enemy5 = Agent((1800, 700), 8, player, all_obstacles_list, 150)
     enemy1.add_neighbours([enemy2, enemy3, enemy4, enemy5])
     enemy2.add_neighbours([enemy1, enemy3, enemy4, enemy5])
     enemy3.add_neighbours([enemy1, enemy2, enemy4, enemy5])
@@ -55,30 +46,25 @@ def main():
         enemy.on_cohesion()
         enemy.on_persuit()
         enemy.on_wander()
+        enemy.on_avoid()
+        enemy.on_hide()
+        all_sprites.add(enemy)
 
-    all_sprites.add(player, enemy1)
-    all_sprites.add(player, enemy2)
-    all_sprites.add(player, enemy3)
-    all_sprites.add(player, enemy4)
-    all_sprites.add(player, enemy5)
-
-    all_objects = pg.sprite.Group()
-    PlaceObjects(20, all_objects)
-
+    all_sprites.add(player)
     done = False
+
     while not done:
         player.rotate_player()
-        # enemy.apply_pursuit(player)
-        # enemy.apply_seek(player.pos)
-        # enemy.apply_wander()
         for enemy in enemies:
-            # enemy.apply_cohesion()
-            # enemy.apply_wander()
             enemy.apply_steering_force()
             enemy.pack_is_ready()
-            # enemy.apply_pursuit(player)
+            if enemy.pos.x < 0 or enemy.pos.x > 1800:
+                enemy.vel.x = -enemy.vel.x
+            if enemy.pos.y < 0 or enemy.pos.y > 800:
+                enemy.vel.y = -enemy.vel.y
 
-        # enemy1.apply_pursuit(player)
+
+
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT]:
             player.do_dodge(1)
@@ -86,6 +72,9 @@ def main():
             player.do_dodge(0)
         elif keys[pg.K_UP]:
             player.player_do_move()
+        elif pg.mouse.get_pressed()[0]:
+            end_point_position = player.shoot_laser(enemies)
+            laser_size = 5
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -96,12 +85,16 @@ def main():
                 elif event.key == pg.K_RIGHT or event.key == pg.K_LEFT:
                     player.stop()
 
+
         all_sprites.update()
         screen.fill((30, 30, 30))
         all_sprites.draw(screen)
-        all_objects.draw(screen)
+        all_obstacles.draw(screen)
+        if laser_size > 0:
+            pg.draw.line(screen, GREEN, player.pos, end_point_position, laser_size)
         pg.display.flip()
         clock.tick(30)
+        laser_size = 0
 
 
 if __name__ == '__main__':
