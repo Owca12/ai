@@ -9,8 +9,8 @@ from SteeringBehaviour.Wander import Wander
 class SteeringBehaviourManager:
     def __init__(self):
         self.behaviours = []
-        self.multiWander = 0.1
-        self.multiCohesion = 0.2
+        self.multiWander = 0.5
+        self.multiCohesion = 0.1
         self.multiPersuit = 0.0
         self.multiAvoid = 0.7
         self.multiHide = 0.15
