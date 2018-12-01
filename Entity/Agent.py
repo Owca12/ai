@@ -1,5 +1,4 @@
 from SteeringBehaviour.GroupBehaviour import *
-from SteeringBehaviour.Wander import Wander
 from SteeringBehaviour.SteeringBehaviourManager import *
 
 
@@ -16,6 +15,17 @@ class Agent(BaseMovableObject):
         self.behaviour_manager = SteeringBehaviourManager()
         self.obstacles = obstacles
         self.search_radius = search_radius
+        self.attack_cool_down = 0
+
+    def refresh_cooldown(self, clock):
+        if self.attack_cool_down > 0:
+            self.attack_cool_down -= clock.get_time()
+
+    def attack(self):
+        if self.attack_cool_down <= 0:
+            if self.rect.colliderect(self.target.rect):
+                self.target.player_hp -= 1
+                self.attack_cool_down = 3000
 
     def add_neighbours(self, neighbours):
         for agent in neighbours:
@@ -57,12 +67,11 @@ class Agent(BaseMovableObject):
         self.vel = self.behaviour_manager.calculate_dithered(self)
 
     def pack_is_ready(self):
-        max_distance = 0
+        counter = 0
         for neighbour in self.neighbours:
-            if max_distance < distance(self.pos, neighbour.pos):
-                max_distance = distance(self.pos, neighbour.pos)
-
-        if max_distance < 150:
+            if 150 > distance(self.pos, neighbour.pos):
+                counter += 1
+        if counter > 3:
             self.behaviour_manager.change_dithered_probabilistic("Persuit", 0.5)
             self.behaviour_manager.change_dithered_probabilistic("Wander", 0.1)
             self.behaviour_manager.change_dithered_probabilistic("Cohesion", 0)
