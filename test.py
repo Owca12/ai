@@ -27,26 +27,26 @@ def destroy_enemy(enemy, enemies, sprites):
 
 
 def main():
-    screen = pg.display.set_mode((1280, 640))
+    screen = pg.display.set_mode((1280, 800))
     animate_laser = False
     clock = pg.time.Clock()
     all_sprites = pg.sprite.Group()
     all_obstacles = pg.sprite.Group()
     statistics_ui = pg.sprite.Group()
     all_obstacles_list = []
-    for i in range(10):
-        x_obj = 100 * random.randint(1, 10) + random.randint(0, 20)
-        y_obj = 100 * random.randint(1, 5) + random.randint(0, 20)
+    for i in range(20):
+        x_obj = 100 + 250 * random.randint(0, 5) + random.randint(0, 20)
+        y_obj = 100 + 250 * random.randint(0, 2) + random.randint(0, 20)
         radius = random.randint(25, 75)
         map_obj = NonMovableObject((x_obj, y_obj), radius)
         all_obstacles_list.append(map_obj)
         all_obstacles.add(map_obj)
 
-    player = Player((120, 240), 4, screen, 10)
+    player = Player((120, 240), 15, screen, 10)
     player_hp_bar = HpBar((270, 0), player)
     player_hp_bar_base = HpBar((0, 0), player)
     statistics_ui.add(player_hp_bar, player_hp_bar_base)
-    enemies = provide_agent(5, player, all_obstacles_list)
+    enemies = provide_agent(50, player, all_obstacles_list)
     for enemy in enemies:
         enemy.on_cohesion()
         enemy.on_persuit()
@@ -68,7 +68,7 @@ def main():
             # player_hp_bar.refresh_player_hp(player.player_hp)
             if enemy.pos.x < 0 or enemy.pos.x > 1280:
                 enemy.vel.x = -enemy.vel.x
-            if enemy.pos.y < 0 or enemy.pos.y > 640:
+            if enemy.pos.y < 0 or enemy.pos.y > 800:
                 enemy.vel.y = -enemy.vel.y
 
         keys = pg.key.get_pressed()

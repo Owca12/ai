@@ -29,16 +29,23 @@ class SingleBehaviour:
             return self.seek(evader.pos + [c * look_ahead_time for c in evader.vel])
 
     def avoid_obstacle(self):
-        move_vector = pg.Vector2(0, 0)
+        move_vector_1 = pg.Vector2(0, 0)
+        move_vector_2 = pg.Vector2(0, 0)
         for obstacle in self.agent.obstacles:
             distance_to_obstacle = distance(self.agent.pos, obstacle.pos)
-            if distance_to_obstacle < (30 + obstacle.radius):
+            if distance_to_obstacle < (20 + obstacle.radius):
                 speed = obstacle.radius / distance_to_obstacle
-                move_vector = [c * speed * self.agent.speed for c in normalize(sub(self.agent.pos, obstacle.pos))]
+                move_vector_1 = [c * speed * self.agent.speed for c in normalize(sub(self.agent.pos, obstacle.pos))]
                 if distance_to_obstacle < obstacle.radius:
-                    move_vector = [c * self.agent.speed for c in normalize(sub(self.agent.pos, obstacle.pos))]
+                    move_vector_1 = [c * self.agent.speed for c in normalize(sub(self.agent.pos, obstacle.pos))]
+        for neighbour in self.agent.neighbours:
+            distance_to_neighbour = distance(self.agent.pos, neighbour.pos)
+            if distance_to_neighbour < 20:
+                move_vector_2 = [c * self.agent.speed for c in normalize(sub(self.agent.pos, neighbour.pos))]
 
+        move_vector = add(move_vector_1, move_vector_2)
         return move_vector
+
 
     def hide(self, player_position):
         move_vector = pg.math.Vector2()

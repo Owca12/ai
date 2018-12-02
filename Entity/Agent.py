@@ -4,11 +4,11 @@ from SteeringBehaviour.SteeringBehaviourManager import *
 
 class Agent(BaseMovableObject):
     def __init__(self, vec_pos, speed, player_target, obstacles, search_radius):
-        self.image = pg.Surface((2 * 30, 2 * 30), pg.SRCALPHA)
+        self.image = pg.Surface((2 * 10, 2 * 10), pg.SRCALPHA)
         pg.draw.circle(
             self.image,
             pg.Color('red'),
-            (20, 20), 20, 0)
+            (10, 10), 10, 0)
         super().__init__(self.image, vec_pos, speed)
         self.neighbours = []
         self.target = player_target
